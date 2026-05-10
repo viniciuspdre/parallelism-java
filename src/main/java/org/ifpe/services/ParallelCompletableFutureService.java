@@ -55,13 +55,13 @@ public class ParallelCompletableFutureService implements DownloadService {
                         try {
                             Path destination = outputDirectory.resolve("pokemon_" + pokemonId + ".png");
                             Files.write(destination, imageBytes);
-                            System.out.println("[CF] Pokémon " + pokemonId + " salvo.");
+                            System.out.println("[PARALLEL - CF] " + Thread.currentThread().getName() + " - Pokémon " + pokemonId + " salvo.");
                         } catch (IOException e) {
                             throw new RuntimeException("Erro ao salvar " + pokemonId, e);
                         }
                     })
                     .exceptionally(e -> {
-                        System.err.println("[CF] Falha no pokémon " + pokemonId + ": " + e.getMessage());
+                        System.err.println("[PARALLEL - CF] Falha no pokémon " + pokemonId + ": " + e.getMessage());
                         return null;
                     })
                 ).toList();
@@ -72,7 +72,7 @@ public class ParallelCompletableFutureService implements DownloadService {
         try {
             boolean finished = executorService.awaitTermination(30, TimeUnit.SECONDS);
             if (!finished) {
-                System.err.println("[CF] Timeout!");
+                System.err.println("[PARALLEL - CF] Timeout!");
             }
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
