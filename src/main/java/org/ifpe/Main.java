@@ -3,6 +3,7 @@ package org.ifpe;
 import org.ifpe.client.PokeApiClient;
 import org.ifpe.services.ParallelCompletableFutureService;
 import org.ifpe.services.ParallelExecutorService;
+import org.ifpe.services.ParallelThreadService;
 import org.ifpe.services.SequentialService;
 
 import java.io.IOException;
@@ -27,5 +28,11 @@ public class Main {
         ParallelCompletableFutureService parallelCompletableFutureService = new ParallelCompletableFutureService(client, Path.of("output/cf"), 4);
         elapsedTime = parallelCompletableFutureService.download(100);
         System.out.println("Tempo total paralelo com CompletableFutureService: " + elapsedTime + "ms");
+
+        System.out.println("\n==============================================================\n");
+
+        ParallelThreadService parallelThreadService = new ParallelThreadService(client, Path.of("output/raw"), 4);
+        elapsedTime = parallelThreadService.download(100);
+        System.out.println("Tempo total paralelo gerenciado manualmente: " + elapsedTime + "ms");
     }
 }
