@@ -39,4 +39,9 @@ public class SequentialService implements DownloadService {
         System.out.println("[SEQ] Concluído em " + elapsed + "ms");
         return elapsed;
     }
+
+    @Override
+    public Path getOutputDirectory() {
+        return outputDirectory;
+    }
 }

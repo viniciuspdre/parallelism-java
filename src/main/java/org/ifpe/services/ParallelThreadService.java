@@ -69,4 +69,9 @@ public class ParallelThreadService implements DownloadService {
         System.out.println("[RAW] Concluído em " + elapsed + "ms");
         return elapsed;
     }
+
+    @Override
+    public Path getOutputDirectory() {
+        return outputDirectory;
+    }
 }

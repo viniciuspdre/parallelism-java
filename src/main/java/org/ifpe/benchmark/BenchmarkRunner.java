@@ -4,6 +4,7 @@ import org.ifpe.client.PokeApiClient;
 import org.ifpe.services.*;
 
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -13,6 +14,7 @@ public class BenchmarkRunner {
     private static final int[] QUANTITIES = {100, 500, 1000};
     private static final int[] THREAD_COUNTS = {2, 4, 8};
     private static final int RUNS = 10;
+    private static final int DELAY_BETWEEN_RUNS_MS = 3000;
     private static final Path BASE_OUTPUT = Path.of("output");
 
     private final PokeApiClient client;
@@ -21,7 +23,7 @@ public class BenchmarkRunner {
         this.client = client;
     }
 
-    public void run() throws IOException {
+    public void run() throws IOException, InterruptedException {
         Map<String, Double> results = new LinkedHashMap<>();
 
         for (int quantity : QUANTITIES) {
@@ -68,20 +70,45 @@ public class BenchmarkRunner {
         printSummary(results);
     }
 
-    private double runBenchmark(DownloadService service, int quantity, String label) {
+    private double runBenchmark(DownloadService service, int quantity, String label) throws InterruptedException {
         System.out.println("\n→ " + label);
 
         long total = 0;
 
         for (int run = 1; run <= RUNS; run++) {
+            try {
+                clearOutputDirectory(service.getOutputDirectory());
+            } catch (IOException e) {
+                System.err.println("Erro ao limpar diretório: " + e.getMessage());
+            }
+
             long elapsed = service.download(quantity);
             total += elapsed;
             System.out.printf("   Run %02d: %dms%n", run, elapsed);
+
+            if (run < RUNS) {
+                System.out.println("   Aguardando " + DELAY_BETWEEN_RUNS_MS / 1000 + "s...");
+                Thread.sleep(DELAY_BETWEEN_RUNS_MS);
+            }
         }
 
         double average = (double) total / RUNS;
         System.out.printf("   Média: %.2fms%n", average);
         return average;
+    }
+
+    private void clearOutputDirectory(Path directory) throws IOException {
+        if (!directory.toFile().exists()) return;
+
+        Files.walk(directory)
+                .filter(Files::isRegularFile)
+                .forEach(file -> {
+                    try {
+                        Files.delete(file);
+                    } catch (IOException e) {
+                        System.err.println("Erro ao deletar: " + file);
+                    }
+                });
     }
 
     private String buildKey(String approach, int quantity, int threads) {
