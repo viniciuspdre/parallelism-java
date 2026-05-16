@@ -70,8 +70,14 @@ public class BenchmarkRunner {
         printSummary(results);
     }
 
-    private double runBenchmark(DownloadService service, int quantity, String label) throws InterruptedException {
+    private double runBenchmark(DownloadService service, int quantity, String label) throws InterruptedException, IOException {
         System.out.println("\n→ " + label);
+
+        System.out.println("   [WARM-UP] Rodando sem medir...");
+        clearOutputDirectory(service.getOutputDirectory());
+        service.download(quantity);
+
+        Thread.sleep(DELAY_BETWEEN_RUNS_MS);
 
         long total = 0;
 
